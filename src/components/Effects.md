@@ -202,7 +202,7 @@ const subscribe = (callback) => {
 
 }
 export default function NetworkIndicator {
-    const networkStatus = React.useSyncExternalStore(snapshot, subcribe)
+    const networkStatus = React.useSyncExternalStore(subscribe, snapshot)
 
     return {
         <div>
@@ -220,3 +220,54 @@ subscribe and getSnapshot are outside of our component. **This is important** be
 In JavaScript, functions are objects, and when you define a function inside another function (like a React component), a new instance of that inner function is created each time the outer function executes. This means that each instance of the inner function has its own unique reference in memory.
 
 Every time NetworkIndicator re-renders, if we had defined subscribe inside of the component, React thinks it's a new function and will un-subscribe then re-subscribe to the store. That's obviously not ideal.
+
+```
+const subscribe = (cb) => {
+  window.addEventListener("resize", cb);
+
+  return () => {
+    window.removeEventListener("resize", cb);
+  };
+}
+
+const getSnapshot = () => {
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }
+}
+
+function useWindowSize() {
+  return useSyncExternalStore(subscribe, getSnapshot)
+}
+```
+The code above will result in an infinite loop because getSnapshot returns a function which is a referncial object. This will mean each time the useWindowSize component renders it will call both functions. getSnapshot will return a new referncial object (new function, now pointing to a different mememroy refrence). This means the components has been updated which then calls both functions again, agan again.
+
+
+***Reactive Values***
+
+A "reactive value" typically refers to a value that, when changed, triggers a re-render or update of the component that depends on it.
+
+State is a reactive value, props are a reactive value
+
+```
+function ChildComponent({ count }) {
+  return <p>The count is {count}</p>;
+}
+
+function ParentComponent() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <ChildComponent count={count} />
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </div>
+  );
+}
+
+```
+
+Above count is passed as a prop from parent to child, that state is held on the parent. A state update will trigger a re-render of both the parent and child. 

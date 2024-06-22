@@ -34,6 +34,7 @@ In the context of React and particularly with hooks like useEffect and useLayout
 In summary, while updating the DOM is about changing the structure and content of the web page, painting is about rendering the visual representation of these changes on the screen. Efficiently managing these processes is key to building smooth and responsive web applications.
 
 
-
+useEffect runs after the render is committed to the screen. This means that the DOM has been painted, and the browser has performed layout and paint operations.
+Use Case: It is suitable for operations that do not require immediate DOM updates, such as fetching data, setting up subscriptions, or logging. Example, we need to monitor for size of an element the user can expand or contract. 
 
 
